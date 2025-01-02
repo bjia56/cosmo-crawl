@@ -1,0 +1,80 @@
+name: Build DCSS
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ["main"]
+
+env:
+  COSMOPOLITAN_VERSION: 3.9.7
+  NCURSES_VERSION: 6.4
+  DCSS_VERSION: 0.32.1
+
+jobs:
+  build:
+    name: Build DCSS
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup cosmocc
+        uses: bjia56/setup-cosmocc@v0.0.3
+        with:
+          version: ${{ env.COSMOPOLITAN_VERSION }}
+
+      - name: Install some packages
+        run: |
+          export DEBIAN_FRONTEND=noninteractive
+          sudo apt update
+          sudo apt -y install wget pkg-config git ncurses-bin ncurses-term
+
+      - name: Make prefix dir
+        run: |
+          prefix=${{ github.workspace }}/cosmo
+          mkdir -p ${prefix}
+          mkdir -p ${prefix}/lib/.aarch64
+          echo "prefix=${prefix}" >> "$GITHUB_ENV"
+
+      - name: Set env vars
+        run: |
+          echo "AR=$(command -v cosmoar)" >> "$GITHUB_ENV"
+          echo "CC=cosmocc" >> "$GITHUB_ENV"
+          echo "CXX=cosmoc++" >> "$GITHUB_ENV"
+          echo "CFLAGS=-I${{ env.prefix }}/include" >> "$GITHUB_ENV"
+          echo "CPPFLAGS=-I${{ env.prefix }}/include" >> "$GITHUB_ENV"
+          echo "CXXFLAGS=${CPPFLAGS} -fexceptions" >> "$GITHUB_ENV"
+          echo "LDFLAGS=-L${{ env.prefix }}/lib" >> "$GITHUB_ENV"
+          echo "PKG_CONFIG_PATH=${{ env.prefix }}/lib/pkgconfig:${{ env.prefix }}/share/pkgconfig" >> "$GITHUB_ENV"
+
+      - name: Build ncurses
+        run: |
+          wget https://github.com/bjia56/build-dependencies/releases/download/portable-python/ncurses-${{ env.NCURSES_VERSION }}.tar.gz
+          tar xf ncurses-${{ env.NCURSES_VERSION }}.tar.gz
+          cd ncurses-${{ env.NCURSES_VERSION }}
+          ./configure --with-normal --without-progs --enable-overwrite --disable-stripping --with-termlib --disable-database --with-fallbacks=xterm,xterm-256color,screen-256color,linux,vt100 --prefix=${{ env.prefix }}
+          make -j4
+          make install
+          cp lib/.aarch64/lib*.a ${{ env.prefix }}/lib/.aarch64
+
+      - name: Build DCSS
+        run: |
+          git clone https://github.com/crawl/crawl.git
+          cd crawl
+          git checkout 0.32.1
+          git submodule update --init
+
+          patch -p1 < ${{ github.workspace }}/dcss.patch
+
+          cd crawl-ref/source
+
+          # enable rtti, exceptions
+          which cosmoc++ | sed -i 's/fno\-rtti//g'
+          which cosmoc++ | sed -i 's/fno\-exceptions//g'
+
+          # disable -pipe flag in the compiler
+          grep -rl "\-pipe" | xargs sed -i 's/\-pipe//g'
+
+          # build
+          FORCE_CC=cosmocc FORCE_CXX=cosmoc++ BUILD_ZLIB=yes make V=1 -j4

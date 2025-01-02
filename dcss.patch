@@ -1,0 +1,40 @@
+diff --git a/crawl-ref/source/Makefile b/crawl-ref/source/Makefile
+index bc7a814262..21133351ca 100644
+--- a/crawl-ref/source/Makefile
++++ b/crawl-ref/source/Makefile
+@@ -129,7 +129,7 @@ include Makefile.obj
+ #
+ 
+ # Which C++ standard to support
+-STDFLAG = -std=c++11
++STDFLAG = -std=c++20
+ 
+ CFOTHERS := -pipe $(EXTERNAL_FLAGS)
+ # Build with FORCE_SSE=y to get better seed stability on 32 bit x86 builds. It
+diff --git a/crawl-ref/source/crash.cc b/crawl-ref/source/crash.cc
+index 76a5fc68b6..968ac37dfe 100644
+--- a/crawl-ref/source/crash.cc
++++ b/crawl-ref/source/crash.cc
+@@ -10,7 +10,7 @@
+ #if defined(UNIX)
+ #include <unistd.h>
+ #include <sys/param.h>
+-#ifndef __HAIKU__
++#if !defined(__HAIKU__) && !defined(__COSMOPOLITAN__)
+         #define BACKTRACE_SUPPORTED
+ #endif
+ #endif
+diff --git a/crawl-ref/source/nearby-danger.cc b/crawl-ref/source/nearby-danger.cc
+index 096451ad55..f9cdfb2bbf 100644
+--- a/crawl-ref/source/nearby-danger.cc
++++ b/crawl-ref/source/nearby-danger.cc
+@@ -7,8 +7,8 @@
+ 
+ #include "nearby-danger.h"
+ 
+-#include <cfloat>
+ #include <cmath>
++#include <cfloat>
+ 
+ #include "abyss.h"
+ #include "act-iter.h"
