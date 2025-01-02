@@ -70,11 +70,11 @@ jobs:
           cd crawl-ref/source
 
           # enable rtti, exceptions
-          which cosmoc++ | sed -i 's/fno\-rtti//g'
-          which cosmoc++ | sed -i 's/fno\-exceptions//g'
+          which cosmoc++ | xargs sed -i 's/fno\-rtti//g'
+          which cosmoc++ | xargs sed -i 's/fno\-exceptions//g'
 
           # disable -pipe flag in the compiler
-          #grep -rl "\-pipe" | xargs sed -i 's/\-pipe//g'
+          grep -rl "\-pipe" | xargs sed -i 's/\-pipe//g'
 
           # build
           FORCE_CC=cosmocc FORCE_CXX=cosmoc++ BUILD_ZLIB=yes make V=1 -j4
