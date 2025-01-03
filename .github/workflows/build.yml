@@ -62,22 +62,17 @@ jobs:
         run: |
           wget https://github.com/bjia56/build-dependencies/releases/download/portable-python/ncurses-${{ env.NCURSES_VERSION }}.tar.gz
 
-          export CFLAGS="-std=c89"
-
           tar xf ncurses-${{ env.NCURSES_VERSION }}.tar.gz
           cd ncurses-${{ env.NCURSES_VERSION }}
-          CC=x86_64-unknown-cosmo-cc CXX=x86_64-unknown-cosmo-c++ ./configure --with-normal --without-progs --enable-overwrite --disable-stripping --enable-widec --with-termlib --disable-database --with-fallbacks=xterm,xterm-256color,screen-256color,linux,vt100 --prefix=/usr/x86_64-unknown-cosmo --host x86_64
+
+          sudo mkdir /usr/x86_64-unknown-cosmo
+          CC=cosmocc CXX=cosmoc++ AR=$(command -v cosmoar) CFLAGS="-std=c89" ./configure --with-normal --without-progs --enable-overwrite --disable-stripping --enable-widec --with-termlib --disable-database --with-fallbacks=xterm,xterm-256color,screen-256color,linux,vt100 --prefix=/usr/x86_64-unknown-cosmo
           make -j4
           sudo make install
 
-          cd ..
-          rm -rf ncurses-${{ env.NCURSES_VERSION }}
-
-          tar xf ncurses-${{ env.NCURSES_VERSION }}.tar.gz
-          cd ncurses-${{ env.NCURSES_VERSION }}
-          CC=aarch64-unknown-cosmo-cc CXX=aarch64-unknown-cosmo-c++ ./configure --with-normal --without-progs --enable-overwrite --disable-stripping --enable-widec --with-termlib --disable-database --with-fallbacks=xterm,xterm-256color,screen-256color,linux,vt100 --prefix=/usr/aarch64-unknown-cosmo --host aarch64
-          make -j4
-          sudo make install
+          sudo cp -r /usr/x86_64-unknown-cosmo /usr/aarch64-unknown-cosmo
+          sudo rm /usr/aarch64-unknown-cosmo/lib/lib*.a
+          sudo cp lib/.aarch64/lib*.a /usr/aarch64-unknown-cosmo/lib
 
       - name: Build DCSS
         run: |
