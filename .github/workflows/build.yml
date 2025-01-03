@@ -164,7 +164,7 @@ jobs:
           sudo cp -r /tmp/dat/dat-aarch64/dat-aarch64 /zip/aarch64/dat
 
           cd /zip
-          zip -qr ${{ github.workspace }}/crawl.com dat-*
+          zip -qr ${{ github.workspace }}/crawl.com *
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
