@@ -84,10 +84,6 @@ jobs:
 
           cd crawl-ref/source
 
-          # prepare zip fs
-          sudo mkdir /zip
-          sudo cp -r dat /zip/dat
-
           # build
           CROSSHOST=${{ matrix.arch }}-unknown-cosmo prefix=/zip/${{ matrix.arch }} make V=1 -j4
           mv crawl crawl-${{ matrix.arch }}
