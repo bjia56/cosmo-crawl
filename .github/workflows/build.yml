@@ -151,6 +151,8 @@ jobs:
             /tmp/crawl/crawl-x86_64 \
             /tmp/crawl/crawl-aarch64
 
+          ls -lah /tmp/dat/
+
           sudo mkdir /zip
           sudo cp -r /tmp/dat/dat-* /zip/
 
