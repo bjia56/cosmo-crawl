@@ -92,7 +92,7 @@ jobs:
           sudo cp -r dat /zip/dat
 
           # build
-          CROSSHOST=${{ matrix.arch }}-unknown-cosmo DATADIR=/zip/dat-${{ matrix.arch }} make V=1 -j4
+          CROSSHOST=${{ matrix.arch }}-unknown-cosmo DATADIR=/zip/${{ matrix.arch }}/dat make V=1 -j4
           mv crawl crawl-${{ matrix.arch }}
           mv dat dat-${{ matrix.arch }}
 
@@ -158,9 +158,10 @@ jobs:
 
           ls -lah /tmp/dat/
 
-          sudo mkdir /zip
-          sudo cp -r /tmp/dat/dat-x86_64/* /zip/
-          sudo cp -r /tmp/dat/dat-aarch64/* /zip/
+          sudo mkdir -p /zip/x86_64
+          sudo mkdir -p /zip/aarch64
+          sudo cp -r /tmp/dat/dat-x86_64/dat-x86_64 /zip/x86_64/dat
+          sudo cp -r /tmp/dat/dat-aarch64/dat-aarch64 /zip/aarch64/dat
 
           cd /zip
           zip -qr ${{ github.workspace }}/crawl.com dat-*
