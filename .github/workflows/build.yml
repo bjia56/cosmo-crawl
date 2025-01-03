@@ -3,7 +3,10 @@ name: Build DCSS
 on:
   workflow_dispatch:
     inputs:
-      debug_interactive:
+      debug_build:
+        required: false
+        type: boolean
+      debug_link:
         required: false
         type: boolean
   push:
@@ -85,25 +88,30 @@ jobs:
           cd crawl-ref/source
 
           # build
-          CROSSHOST=${{ matrix.arch }}-unknown-cosmo DATADIR=/zip/${{ matrix.arch }}/dat make V=1 -j4
+          CROSSHOST=${{ matrix.arch }}-unknown-cosmo DATADIR=/zip/${{ matrix.arch }}/ make V=1 -j4
           mv crawl crawl-${{ matrix.arch }}
-          mv dat dat-${{ matrix.arch }}
 
-      - name: Upload artifacts
+      - name: Upload crawl
         uses: actions/upload-artifact@v4
         with:
           name: crawl-${{ matrix.arch }}
           path: ./crawl/crawl-ref/source/crawl-${{ matrix.arch }}
           
-      - name: Upload artifacts
+      - name: Upload dat
         uses: actions/upload-artifact@v4
         with:
           name: dat-${{ matrix.arch }}
-          path: ./crawl/crawl-ref/source/dat-${{ matrix.arch }}
+          path: ./crawl/crawl-ref/source/dat
+
+      - name: Upload docs
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs-${{ matrix.arch }}
+          path: ./crawl/crawl-ref/docs
           
       - name: Interactive debugging
         uses: fawazahmed0/action-debug-vscode@v3
-        if: ${{ always() && inputs.debug_interactive }}
+        if: ${{ always() && inputs.debug_build }}
     
   apelink:
     name: Apelink DCSS
@@ -119,24 +127,36 @@ jobs:
         with:
           version: ${{ env.COSMOPOLITAN_VERSION }}
         
-      - name: Download artifact
+      - name: Download crawl
         uses: actions/download-artifact@v4
         with:
           pattern: crawl-*
           path: /tmp/crawl/
           merge-multiple: true
   
-      - name: Download artifact
+      - name: Download dat x86_64
         uses: actions/download-artifact@v4
         with:
           pattern: dat-x86_64
-          path: /tmp/dat/dat-x86_64
+          path: /tmp/dat-x86_64
   
-      - name: Download artifact
+      - name: Download dat aarch64
         uses: actions/download-artifact@v4
         with:
           pattern: dat-aarch64
-          path: /tmp/dat/dat-aarch64
+          path: /tmp/dat-aarch64
+  
+      - name: Download docs x86_64
+        uses: actions/download-artifact@v4
+        with:
+          pattern: docs-x86_64
+          path: /tmp/docs-x86_64
+  
+      - name: Download docs aarch64
+        uses: actions/download-artifact@v4
+        with:
+          pattern: docs-aarch64
+          path: /tmp/docs-aarch64
   
       - name: Apelink
         run: |
@@ -149,12 +169,12 @@ jobs:
             /tmp/crawl/crawl-x86_64 \
             /tmp/crawl/crawl-aarch64
 
-          ls -lah /tmp/dat/
-
           sudo mkdir -p /zip/x86_64
           sudo mkdir -p /zip/aarch64
-          sudo cp -r /tmp/dat/dat-x86_64/dat-x86_64 /zip/x86_64/dat
-          sudo cp -r /tmp/dat/dat-aarch64/dat-aarch64 /zip/aarch64/dat
+          sudo cp -r /tmp/dat-x86_64/dat /zip/x86_64/dat
+          sudo cp -r /tmp/dat-aarch64/dat /zip/aarch64/dat
+          sudo cp -r /tmp/docs-x86_64/docs /zip/x86_64/docs
+          sudo cp -r /tmp/docs-aarch64/docs /zip/aarch64/docs
 
           cd /zip
           zip -qr ${{ github.workspace }}/crawl.com *
@@ -164,3 +184,7 @@ jobs:
         with:
           name: crawl.com
           path: ./crawl.com
+          
+      - name: Interactive debugging
+        uses: fawazahmed0/action-debug-vscode@v3
+        if: ${{ always() && inputs.debug_link }}
