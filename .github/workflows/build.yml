@@ -89,7 +89,7 @@ jobs:
           sudo cp -r dat /zip/dat
 
           # build
-          CROSSHOST=${{ matrix.arch }}-unknown-cosmo DATADIR=/zip/${{ matrix.arch }}/dat make V=1 -j4
+          CROSSHOST=${{ matrix.arch }}-unknown-cosmo prefix=/zip/${{ matrix.arch }} make V=1 -j4
           mv crawl crawl-${{ matrix.arch }}
           mv dat dat-${{ matrix.arch }}
 
