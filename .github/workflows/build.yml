@@ -159,7 +159,8 @@ jobs:
           ls -lah /tmp/dat/
 
           sudo mkdir /zip
-          sudo cp -r /tmp/dat/dat-* /zip/
+          sudo cp -r /tmp/dat/dat-x86_64/* /zip/
+          sudo cp -r /tmp/dat/dat-aarch64/* /zip/
 
           cd /zip
           zip -qr ${{ github.workspace }}/crawl.com dat-*
