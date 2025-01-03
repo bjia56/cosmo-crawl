@@ -2,6 +2,10 @@ name: Build DCSS
 
 on:
   workflow_dispatch:
+    inputs:
+      debug_interactive:
+        required: false
+        type: boolean
   push:
     branches: ["main"]
 
@@ -24,39 +28,54 @@ jobs:
         with:
           version: ${{ env.COSMOPOLITAN_VERSION }}
 
+      - name: Fixup Cosmopolitan toolchain
+        run: |
+          cd $(dirname $(which cosmocc))
+
+          chmod +x cosmoranlib
+          ln -s cosmoranlib x86_64-unknown-cosmo-ranlib
+          ln -s cosmoranlib aarch64-unknown-cosmo-ranlib
+
+          ln -s x86_64-unknown-cosmo-cc x86_64-unknown-cosmo-gcc
+          ln -s x86_64-unknown-cosmo-c++ x86_64-unknown-cosmo-g++
+          ln -s aarch64-unknown-cosmo-cc aarch64-unknown-cosmo-gcc
+          ln -s aarch64-unknown-cosmo-c++ aarch64-unknown-cosmo-g++
+
+          # enable rtti, exceptions
+          which x86_64-unknown-cosmo-c++ | xargs sed -i 's/fno\-rtti//g'
+          which x86_64-unknown-cosmo-c++ | xargs sed -i 's/fno\-exceptions//g'
+          which aarch64-unknown-cosmo-c++ | xargs sed -i 's/fno\-rtti//g'
+          which aarch64-unknown-cosmo-c++ | xargs sed -i 's/fno\-exceptions//g'
+
       - name: Install some packages
         run: |
           export DEBIAN_FRONTEND=noninteractive
           sudo apt update
           sudo apt -y install wget pkg-config git ncurses-bin ncurses-term
 
-      - name: Make prefix dir
+      - name: Make ncurses prefix dirs
         run: |
-          prefix=${{ github.workspace }}/cosmo
-          mkdir -p ${prefix}
-          mkdir -p ${prefix}/lib/.aarch64
-          echo "prefix=${prefix}" >> "$GITHUB_ENV"
-
-      - name: Set env vars
-        run: |
-          echo "AR=$(command -v cosmoar)" >> "$GITHUB_ENV"
-          echo "CC=cosmocc" >> "$GITHUB_ENV"
-          echo "CXX=cosmoc++" >> "$GITHUB_ENV"
-          echo "CFLAGS=-I${{ env.prefix }}/include" >> "$GITHUB_ENV"
-          echo "CPPFLAGS=-I${{ env.prefix }}/include" >> "$GITHUB_ENV"
-          echo "CXXFLAGS=${CPPFLAGS} -fexceptions" >> "$GITHUB_ENV"
-          echo "LDFLAGS=-L${{ env.prefix }}/lib" >> "$GITHUB_ENV"
-          echo "PKG_CONFIG_PATH=${{ env.prefix }}/lib/pkgconfig:${{ env.prefix }}/share/pkgconfig" >> "$GITHUB_ENV"
+          sudo mkdir /usr/x86_64-unknown-cosmo
+          sudo mkdir /usr/aarch64-unknown-cosmo
 
       - name: Build ncurses
         run: |
           wget https://github.com/bjia56/build-dependencies/releases/download/portable-python/ncurses-${{ env.NCURSES_VERSION }}.tar.gz
+
           tar xf ncurses-${{ env.NCURSES_VERSION }}.tar.gz
           cd ncurses-${{ env.NCURSES_VERSION }}
-          ./configure --with-normal --without-progs --enable-overwrite --disable-stripping --with-termlib --disable-database --with-fallbacks=xterm,xterm-256color,screen-256color,linux,vt100 --prefix=${{ env.prefix }}
+          CC=x86_64-unknown-cosmo-cc CXX=x86_64-unknown-cosmo-c++ ./configure --with-normal --without-progs --enable-overwrite --disable-stripping --enable-widec --with-termlib --disable-database --with-fallbacks=xterm,xterm-256color,screen-256color,linux,vt100 --prefix=/usr/x86_64-unknown-cosmo
           make -j4
-          make install
-          cp lib/.aarch64/lib*.a ${{ env.prefix }}/lib/.aarch64
+          sudo make install
+
+          cd ..
+          rm -rf ncurses-${{ env.NCURSES_VERSION }}
+
+          tar xf ncurses-${{ env.NCURSES_VERSION }}.tar.gz
+          cd ncurses-${{ env.NCURSES_VERSION }}
+          CC=aarch64-unknown-cosmo-cc CXX=aarch64-unknown-cosmo-c++ ./configure --with-normal --without-progs --enable-overwrite --disable-stripping --enable-widec --with-termlib --disable-database --with-fallbacks=xterm,xterm-256color,screen-256color,linux,vt100 --prefix=/usr/aarch64-unknown-cosmo
+          make -j4
+          sudo make install
 
       - name: Build DCSS
         run: |
@@ -64,17 +83,17 @@ jobs:
           cd crawl
           git checkout 0.32.1
           git submodule update --init
-
           patch -p1 < ${{ github.workspace }}/dcss.patch
 
           cd crawl-ref/source
-
-          # enable rtti, exceptions
-          which cosmoc++ | xargs sed -i 's/fno\-rtti//g'
-          which cosmoc++ | xargs sed -i 's/fno\-exceptions//g'
 
           # disable -pipe flag in the compiler
           grep -rl "\-pipe" | xargs sed -i 's/\-pipe//g'
 
           # build
-          FORCE_CC=cosmocc FORCE_CXX=cosmoc++ BUILD_ZLIB=yes make V=1 -j4
+          CROSSHOST=x86_64-unknown-cosmo make V=1 -j4
+          CROSSHOST=aarch64-unknown-cosmo make V=1 -j4
+
+      - name: Interactive debugging
+        uses: fawazahmed0/action-debug-vscode@v3
+        if: ${{ always() && inputs.debug_interactive }}
