@@ -92,15 +92,22 @@ jobs:
           sudo cp -r dat /zip/dat
 
           # build
-          CROSSHOST=${{ matrix.arch }}-unknown-cosmo DATADIR=/zip/dat make V=1 -j4
+          CROSSHOST=${{ matrix.arch }}-unknown-cosmo DATADIR=/zip/dat-${{ matrix.arch }} make V=1 -j4
           mv crawl crawl-${{ matrix.arch }}
+          mv dat dat-${{ matrix.arch }}
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: crawl-${{ matrix.arch }}
           path: ./crawl/crawl-ref/source/crawl-${{ matrix.arch }}
-
+          
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dat-${{ matrix.arch }}
+          path: ./crawl/crawl-ref/source/dat-${{ matrix.arch }}
+          
       - name: Interactive debugging
         uses: fawazahmed0/action-debug-vscode@v3
         if: ${{ always() && inputs.debug_interactive }}
@@ -125,7 +132,14 @@ jobs:
           pattern: crawl-*
           path: /tmp/crawl/
           merge-multiple: true
-
+  
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          pattern: dat-*
+          path: /tmp/dat/
+          merge-multiple: true
+  
       - name: Apelink
         run: |
           cosmo_bin=$(dirname $(which cosmocc))
@@ -137,17 +151,11 @@ jobs:
             /tmp/crawl/crawl-x86_64 \
             /tmp/crawl/crawl-aarch64
 
-          git clone https://github.com/crawl/crawl.git
-          cd crawl
-          git checkout ${{ env.DCSS_VERSION }}
-          git submodule update --init
-          patch -p1 < ${{ github.workspace }}/dcss.patch
-
           sudo mkdir /zip
-          sudo cp -r crawl-ref/source/dat /zip/dat
+          sudo cp -r /tmp/dat/dat-* /zip/
 
           cd /zip
-          zip -qr ${{ github.workspace }}/crawl.com dat
+          zip -qr ${{ github.workspace }}/crawl.com dat-*
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
