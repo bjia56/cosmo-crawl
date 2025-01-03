@@ -66,7 +66,7 @@ jobs:
 
           tar xf ncurses-${{ env.NCURSES_VERSION }}.tar.gz
           cd ncurses-${{ env.NCURSES_VERSION }}
-          CC=x86_64-unknown-cosmo-cc CXX=x86_64-unknown-cosmo-c++ ./configure --with-normal --without-progs --enable-overwrite --disable-stripping --enable-widec --with-termlib --disable-database --with-fallbacks=xterm,xterm-256color,screen-256color,linux,vt100 --prefix=/usr/x86_64-unknown-cosmo
+          CC=x86_64-unknown-cosmo-cc CXX=x86_64-unknown-cosmo-c++ ./configure --with-normal --without-progs --enable-overwrite --disable-stripping --enable-widec --with-termlib --disable-database --with-fallbacks=xterm,xterm-256color,screen-256color,linux,vt100 --prefix=/usr/x86_64-unknown-cosmo --host x86_64
           make -j4
           sudo make install
 
@@ -75,7 +75,7 @@ jobs:
 
           tar xf ncurses-${{ env.NCURSES_VERSION }}.tar.gz
           cd ncurses-${{ env.NCURSES_VERSION }}
-          CC=aarch64-unknown-cosmo-cc CXX=aarch64-unknown-cosmo-c++ ./configure --with-normal --without-progs --enable-overwrite --disable-stripping --enable-widec --with-termlib --disable-database --with-fallbacks=xterm,xterm-256color,screen-256color,linux,vt100 --prefix=/usr/aarch64-unknown-cosmo
+          CC=aarch64-unknown-cosmo-cc CXX=aarch64-unknown-cosmo-c++ ./configure --with-normal --without-progs --enable-overwrite --disable-stripping --enable-widec --with-termlib --disable-database --with-fallbacks=xterm,xterm-256color,screen-256color,linux,vt100 --prefix=/usr/aarch64-unknown-cosmo --host aarch64
           make -j4
           sudo make install
 
