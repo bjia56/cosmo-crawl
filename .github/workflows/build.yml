@@ -10,7 +10,7 @@ on:
     branches: ["main"]
 
 env:
-  COSMOPOLITAN_VERSION: 3.9.7
+  COSMOPOLITAN_VERSION: 4.0.0
   NCURSES_VERSION: 6.4
   DCSS_VERSION: 0.32.1
 
