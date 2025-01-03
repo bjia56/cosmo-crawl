@@ -33,17 +33,3 @@ index 76a5fc68b6..968ac37dfe 100644
          #define BACKTRACE_SUPPORTED
  #endif
  #endif
-diff --git a/crawl-ref/source/nearby-danger.cc b/crawl-ref/source/nearby-danger.cc
-index 096451ad55..f9cdfb2bbf 100644
---- a/crawl-ref/source/nearby-danger.cc
-+++ b/crawl-ref/source/nearby-danger.cc
-@@ -7,8 +7,8 @@
- 
- #include "nearby-danger.h"
- 
--#include <cfloat>
- #include <cmath>
-+#include <cfloat>
- 
- #include "abyss.h"
- #include "act-iter.h"
