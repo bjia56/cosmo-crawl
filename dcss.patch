@@ -1,5 +1,5 @@
 diff --git a/crawl-ref/source/Makefile b/crawl-ref/source/Makefile
-index bc7a814262..21133351ca 100644
+index 18b72de195..82cb07edbd 100644
 --- a/crawl-ref/source/Makefile
 +++ b/crawl-ref/source/Makefile
 @@ -129,7 +129,7 @@ include Makefile.obj
@@ -11,6 +11,15 @@ index bc7a814262..21133351ca 100644
  
  CFOTHERS := -pipe $(EXTERNAL_FLAGS)
  # Build with FORCE_SSE=y to get better seed stability on 32 bit x86 builds. It
+@@ -1072,7 +1072,7 @@ else
+   NCURSESLIB = ncursesw
+ endif
+ 
+-NC_LIBS := -L$(NC_PREFIX)/lib -l$(NCURSESLIB)
++NC_LIBS := -L$(NC_PREFIX)/lib -l$(NCURSESLIB) -ltinfow
+ NC_CFLAGS := -isystem $(NC_PREFIX)/include/$(NCURSESLIB)
+ 
+ ifndef NO_PKGCONFIG
 diff --git a/crawl-ref/source/crash.cc b/crawl-ref/source/crash.cc
 index 76a5fc68b6..968ac37dfe 100644
 --- a/crawl-ref/source/crash.cc

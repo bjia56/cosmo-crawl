@@ -16,8 +16,12 @@ env:
 
 jobs:
   build:
-    name: Build DCSS
+    name: Build DCSS ${{ matrix.arch }}
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [x86_64, aarch64]
 
     steps:
       - name: Checkout
@@ -33,19 +37,14 @@ jobs:
           cd $(dirname $(which cosmocc))
 
           chmod +x cosmoranlib
-          ln -s cosmoranlib x86_64-unknown-cosmo-ranlib
-          ln -s cosmoranlib aarch64-unknown-cosmo-ranlib
+          ln -s cosmoranlib ${{ matrix.arch }}-unknown-cosmo-ranlib
 
-          ln -s x86_64-unknown-cosmo-cc x86_64-unknown-cosmo-gcc
-          ln -s x86_64-unknown-cosmo-c++ x86_64-unknown-cosmo-g++
-          ln -s aarch64-unknown-cosmo-cc aarch64-unknown-cosmo-gcc
-          ln -s aarch64-unknown-cosmo-c++ aarch64-unknown-cosmo-g++
+          ln -s ${{ matrix.arch }}-unknown-cosmo-cc ${{ matrix.arch }}-unknown-cosmo-gcc
+          ln -s ${{ matrix.arch }}-unknown-cosmo-c++ ${{ matrix.arch }}-unknown-cosmo-g++
 
           # enable rtti, exceptions
-          which x86_64-unknown-cosmo-c++ | xargs sed -i 's/fno\-rtti//g'
-          which x86_64-unknown-cosmo-c++ | xargs sed -i 's/fno\-exceptions//g'
-          which aarch64-unknown-cosmo-c++ | xargs sed -i 's/fno\-rtti//g'
-          which aarch64-unknown-cosmo-c++ | xargs sed -i 's/fno\-exceptions//g'
+          which ${{ matrix.arch }}-unknown-cosmo-c++ | xargs sed -i 's/fno\-rtti//g'
+          which ${{ matrix.arch }}-unknown-cosmo-c++ | xargs sed -i 's/fno\-exceptions//g'
 
       - name: Install some packages
         run: |
@@ -55,6 +54,8 @@ jobs:
 
       - name: Build ncurses
         run: |
+          # this step is the same for both architectures, since it's easier to compile ncurses jointly
+
           wget https://github.com/bjia56/build-dependencies/releases/download/portable-python/ncurses-${{ env.NCURSES_VERSION }}.tar.gz
 
           tar xf ncurses-${{ env.NCURSES_VERSION }}.tar.gz
@@ -69,11 +70,15 @@ jobs:
           sudo rm /usr/aarch64-unknown-cosmo/lib/lib*.a
           sudo cp lib/.aarch64/lib*.a /usr/aarch64-unknown-cosmo/lib
 
+          # DCSS wants to look for headers in this subdir...
+          sudo ln -s /usr/x86_64-unknown-cosmo/include/ /usr/x86_64-unknown-cosmo/include/ncursesw
+          sudo ln -s /usr/aarch64-unknown-cosmo/include/ /usr/aarch64-unknown-cosmo/include/ncursesw
+
       - name: Build DCSS
         run: |
           git clone https://github.com/crawl/crawl.git
           cd crawl
-          git checkout 0.32.1
+          git checkout ${{ env.DCSS_VERSION }}
           git submodule update --init
           patch -p1 < ${{ github.workspace }}/dcss.patch
 
@@ -83,8 +88,13 @@ jobs:
           grep -rl "\-pipe" | xargs sed -i 's/\-pipe//g'
 
           # build
-          CROSSHOST=x86_64-unknown-cosmo make V=1 -j4
-          CROSSHOST=aarch64-unknown-cosmo make V=1 -j4
+          CROSSHOST=${{ matrix.arch }}-unknown-cosmo make V=1 -j4
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: crawl-${{ matrix.arch }}
+          path: ./crawl/crawl-ref/source/crawl
 
       - name: Interactive debugging
         uses: fawazahmed0/action-debug-vscode@v3
