@@ -62,6 +62,8 @@ jobs:
         run: |
           wget https://github.com/bjia56/build-dependencies/releases/download/portable-python/ncurses-${{ env.NCURSES_VERSION }}.tar.gz
 
+          export CFLAGS="-std=c89"
+
           tar xf ncurses-${{ env.NCURSES_VERSION }}.tar.gz
           cd ncurses-${{ env.NCURSES_VERSION }}
           CC=x86_64-unknown-cosmo-cc CXX=x86_64-unknown-cosmo-c++ ./configure --with-normal --without-progs --enable-overwrite --disable-stripping --enable-widec --with-termlib --disable-database --with-fallbacks=xterm,xterm-256color,screen-256color,linux,vt100 --prefix=/usr/x86_64-unknown-cosmo
