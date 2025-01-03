@@ -87,15 +87,70 @@ jobs:
           # disable -pipe flag in the compiler
           grep -rl "\-pipe" | xargs sed -i 's/\-pipe//g'
 
+          # prepare zip fs
+          sudo mkdir /zip
+          sudo cp -r dat /zip/dat
+
           # build
-          CROSSHOST=${{ matrix.arch }}-unknown-cosmo make V=1 -j4
+          CROSSHOST=${{ matrix.arch }}-unknown-cosmo DATADIR=/zip/dat make V=1 -j4
+          mv crawl crawl-${{ matrix.arch }}
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: crawl-${{ matrix.arch }}
-          path: ./crawl/crawl-ref/source/crawl
+          path: ./crawl/crawl-ref/source/crawl-${{ matrix.arch }}
 
       - name: Interactive debugging
         uses: fawazahmed0/action-debug-vscode@v3
         if: ${{ always() && inputs.debug_interactive }}
+    
+  apelink:
+    name: Apelink DCSS
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup cosmocc
+        uses: bjia56/setup-cosmocc@v0.0.3
+        with:
+          version: ${{ env.COSMOPOLITAN_VERSION }}
+        
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          pattern: crawl-*
+          path: /tmp/crawl/
+          merge-multiple: true
+
+      - name: Apelink
+        run: |
+          cosmo_bin=$(dirname $(which cosmocc))
+          $(which apelink) \
+            -l ${cosmo_bin}/ape-x86_64.elf \
+            -l ${cosmo_bin}/ape-aarch64.elf \
+            -M ${cosmo_bin}/ape-m1.c \
+            -o crawl.com \
+            /tmp/crawl/crawl-x86_64 \
+            /tmp/crawl/crawl-aarch64
+
+          git clone https://github.com/crawl/crawl.git
+          cd crawl
+          git checkout ${{ env.DCSS_VERSION }}
+          git submodule update --init
+          patch -p1 < ${{ github.workspace }}/dcss.patch
+
+          sudo mkdir /zip
+          sudo cp -r crawl-ref/source/dat /zip/dat
+
+          cd /zip
+          zip -qr ${{ github.workspace }}/crawl.com dat
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: crawl.com
+          path: ./crawl.com
