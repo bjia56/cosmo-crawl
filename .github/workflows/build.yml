@@ -53,11 +53,6 @@ jobs:
           sudo apt update
           sudo apt -y install wget pkg-config git ncurses-bin ncurses-term
 
-      - name: Make ncurses prefix dirs
-        run: |
-          sudo mkdir /usr/x86_64-unknown-cosmo
-          sudo mkdir /usr/aarch64-unknown-cosmo
-
       - name: Build ncurses
         run: |
           wget https://github.com/bjia56/build-dependencies/releases/download/portable-python/ncurses-${{ env.NCURSES_VERSION }}.tar.gz
