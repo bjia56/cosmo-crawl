@@ -15,7 +15,7 @@ on:
 env:
   COSMOPOLITAN_VERSION: 4.0.0
   NCURSES_VERSION: 6.4
-  DCSS_VERSION: 0.32.1
+  DCSS_VERSION: cosmo
 
 jobs:
   build:
@@ -79,7 +79,7 @@ jobs:
 
       - name: Build DCSS
         run: |
-          git clone https://github.com/crawl/crawl.git
+          git clone https://github.com/bjia56/crawl.git
           cd crawl
           git checkout ${{ env.DCSS_VERSION }}
           git submodule update --init
