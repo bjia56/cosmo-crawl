@@ -50,7 +50,7 @@ jobs:
           gh release create ${{ env.NEXT_TAG }} \
             --title ${{ env.NEXT_TAG }} \
             --target ${{ github.sha }} \
-            ${{ fromJSON(env.LATEST_TAG_NUM) && format('--generate-notes --notes-start-tag {0}.{1}', inputs.dcss_version, env.LATEST_TAG_NUM) || format('--notes "Dungeon Crawl Stone Soup {0}"', inputs.dcss_version) }}
+            ${{ env.LATEST_TAG_NUM != 'null' && format('--generate-notes --notes-start-tag {0}.{1}', inputs.dcss_version, env.LATEST_TAG_NUM) || format('--notes "Dungeon Crawl Stone Soup {0}"', inputs.dcss_version) }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
