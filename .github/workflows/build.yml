@@ -272,16 +272,19 @@ jobs:
         if: ${{ matrix.os == 'FreeBSD' }}
         shell: freebsd {0}
         run: |
+          cd ${{ github.workspace }}
           ./crawl.com -version
 
       - name: Check crawl.com
         if: ${{ matrix.os == 'NetBSD' }}
         shell: netbsd {0}
         run: |
+          cd ${{ github.workspace }}
           ./crawl.com -version
 
       - name: Check crawl.com
         if: ${{ matrix.os == 'OpenBSD' }}
         shell: openbsd {0}
         run: |
+          cd ${{ github.workspace }}
           ./crawl.com -version
