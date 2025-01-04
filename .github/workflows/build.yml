@@ -244,7 +244,7 @@ jobs:
         if: ${{ !contains(matrix.os, 'BSD') }}
         shell: bash
         run: |
-          ./crawl.com --help
+          ./crawl.com -version
 
       - name: Check crawl.com
         if: ${{ matrix.os == 'FreeBSD' }}
@@ -252,10 +252,8 @@ jobs:
         with:
           usesh: true
           copyback: false
-          prepare: |
-            pkg install -y bash
           run: |
-            bash -c "./crawl.com --help"
+            ./crawl.com -version
 
       - name: Check crawl.com
         if: ${{ matrix.os == 'NetBSD' }}
@@ -264,4 +262,4 @@ jobs:
           usesh: true
           copyback: false
           run: |
-            bash -c "./crawl.com --help"
+            ./crawl.com -version
