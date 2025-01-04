@@ -1,0 +1,61 @@
+name: Build and publish DCSS
+
+on:
+  workflow_dispatch:
+    inputs:
+      dcss_version:
+        required: true
+        type: string
+
+jobs:
+  build:
+    name: Build DCSS ${{ inputs.dcss_version }}
+    uses: ./.github/workflows/build.yml
+    with:
+      dcss_version: ${{ inputs.dcss_version }}
+
+
+  publish:
+    name: Publish DCSS ${{ inputs.dcss_version }}
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Get tags
+        run: git fetch --tags origin
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: crawl.com
+          path: .
+
+      - name: Configure Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Get tags
+        run: |
+          echo "LATEST_TAG=$(python ./versions.py ${{ inputs.dcss_version }} | jq .latest)" >> $GITHUB_ENV
+          echo "NEXT_TAG=$(python ./versions.py ${{ inputs.dcss_version }} | jq .next)" >> $GITHUB_ENV
+
+      - name: Create release
+        run: |
+          gh release create ${{ env.NEXT_TAG }} \
+            --title ${{ env.NEXT_TAG }} \
+            --target ${{ github.sha }} \
+            ${{ fromJSON(env.LATEST_TAG) && format('--generate-notes --notes-start-tag {0}', env.LATEST_TAG) || format('--notes "Dungeon Crawl Stone Soup {0}"', inputs.dcss_version) }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload files
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ./crawl.com
+          tag_name: ${{ env.NEXT_TAG }}
