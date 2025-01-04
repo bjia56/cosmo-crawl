@@ -253,8 +253,9 @@ jobs:
         if: ${{ matrix.os == 'Windows' }}
         shell: cmd
         run: |
+          copy crawl.com C:
           "C:\Program Files\Windows Defender\MpCmdRun.exe" -SignatureUpdate
-          "C:\Program Files\Windows Defender\MpCmdRun.exe" -Scan -ScanType 3 -File crawl.com
+          "C:\Program Files\Windows Defender\MpCmdRun.exe" -Scan -ScanType 3 -File C:\crawl.com
 
       - name: Check crawl.com
         if: ${{ !contains(matrix.os, 'BSD') }}
