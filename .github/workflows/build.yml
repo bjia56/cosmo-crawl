@@ -243,10 +243,11 @@ jobs:
         run: |
           chmod +x crawl.com
 
-      - name: Enable Windows Update
+      - name: Configure Windows
         if: ${{ matrix.os == 'Windows' }}
         shell: powershell
         run: |
+          Remove-MpPreference -ExclusionPath (Get-MpPreference).ExclusionPath
           Set-Service -Name wuauserv -StartupType Manual -Status Running
 
       - name: Scan with Windows Defender
