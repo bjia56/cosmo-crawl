@@ -243,7 +243,13 @@ jobs:
         run: |
           chmod +x crawl.com
 
-      - name: Scan with Defender
+      - name: Enable Windows Update
+        if: ${{ matrix.os == 'Windows' }}
+        shell: powershell
+        run: |
+          Set-Service -Name wuauserv -StartupType Manual -Status Running
+
+      - name: Scan with Windows Defender
         if: ${{ matrix.os == 'Windows' }}
         shell: cmd
         run: |
