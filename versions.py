@@ -14,7 +14,7 @@ def get_git_tags():
 
 def extract_build_numbers(tags, version):
     """Extract build numbers for a specific version from the list of tags."""
-    version_pattern = re.compile(rf"^{re.escape(version)}\\.(\\d+)$")
+    version_pattern = re.compile(rf"^{re.escape(version)}\.(\d+)$")
     build_numbers = []
 
     for tag in tags:
