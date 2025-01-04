@@ -205,31 +205,24 @@ jobs:
           - runner: macos-13
             arch: x86_64
             os: MacOS
-            shell: bash
           - runner: macos-14
             arch: arm64
             os: MacOS
-            shell: bash
           - runner: ubuntu-latest
             arch: x86_64
             os: Linux
-            shell: bash
           - runner: windows-latest
             arch: x86_64
             os: Windows
-            shell: bash
           - runner: ubuntu-latest
             arch: x86_64
             os: FreeBSD
-            shell: freebsd {0}
           - runner: ubuntu-latest
             arch: x86_64
             os: NetBSD
-            shell: netbsd {0}
           - runner: ubuntu-latest
             arch: x86_64
             os: OpenBSD
-            shell: openbsd {0}
 
     steps:
       - name: Set up cosmocc
@@ -249,6 +242,12 @@ jobs:
         shell: bash
         run: |
           chmod +x crawl.com
+
+      - name: Check crawl.com
+        if: ${{ !contains(matrix.os, 'BSD') }}
+        shell: bash
+        run: |
+          ./crawl.com -version
 
       - name: Start VM
         if: ${{ matrix.os == 'FreeBSD' }}
@@ -270,6 +269,19 @@ jobs:
           release: 7.3
 
       - name: Check crawl.com
-        shell: ${{ matrix.shell }}
+        if: ${{ matrix.os == 'FreeBSD' }}
+        shell: freebsd {0}
+        run: |
+          ./crawl.com -version
+
+      - name: Check crawl.com
+        if: ${{ matrix.os == 'NetBSD' }}
+        shell: netbsd {0}
+        run: |
+          ./crawl.com -version
+
+      - name: Check crawl.com
+        if: ${{ matrix.os == 'OpenBSD' }}
+        shell: openbsd {0}
         run: |
           ./crawl.com -version
