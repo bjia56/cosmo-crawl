@@ -18,7 +18,7 @@ on:
         type: string
 
 env:
-  COSMOPOLITAN_VERSION: 4.0.0
+  COSMOPOLITAN_VERSION: 4.0.1
   NCURSES_VERSION: 6.4
   DCSS_VERSION: ${{ inputs.dcss_version || '0.32.1' }}
 
