@@ -243,6 +243,13 @@ jobs:
         run: |
           chmod +x crawl.com
 
+      - name: Scan with Defender
+        if: ${{ matrix.os == 'Windows' }}
+        shell: cmd
+        run: |
+          "C:\Program Files\Windows Defender\MpCmdRun.exe" -SignatureUpdate
+          "C:\Program Files\Windows Defender\MpCmdRun.exe" -Scan -ScanType 3 -File crawl.com
+
       - name: Check crawl.com
         if: ${{ !contains(matrix.os, 'BSD') }}
         shell: bash
