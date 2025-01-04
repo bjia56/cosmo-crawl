@@ -193,3 +193,75 @@ jobs:
       - name: Interactive debugging
         uses: fawazahmed0/action-debug-vscode@v3
         if: ${{ always() && inputs.debug_link }}
+
+  check:
+    name: Check crawl.com ${{ matrix.os }} ${{ matrix.arch }}
+    needs: apelink
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-13
+            arch: x86_64
+            os: MacOS
+          - runner: macos-14
+            arch: arm64
+            os: MacOS
+          - runner: ubuntu-latest
+            arch: x86_64
+            os: Linux
+          - runner: windows-latest
+            arch: x86_64
+            os: Windows
+          - runner: ubuntu-latest
+            arch: x86_64
+            os: FreeBSD
+          - runner: ubuntu-latest
+            arch: x86_64
+            os: NetBSD
+
+    steps:
+      - name: Set up cosmocc
+        if: ${{ matrix.os == 'Linux' }}
+        uses: bjia56/setup-cosmocc@v0.0.3
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: crawl.com
+          path: .
+
+      - name: Mark executable
+        shell: bash
+        run: |
+          chmod +x crawl.com
+
+      - name: Check crawl.com
+        if: ${{ !contains(matrix.os, 'BSD') }}
+        shell: bash
+        run: |
+          ./crawl.com --help
+
+      - name: Check crawl.com
+        if: ${{ matrix.os == 'FreeBSD' }}
+        uses: vmactions/freebsd-vm@v1
+        with:
+          usesh: true
+          copyback: false
+          prepare: |
+            pkg install -y bash
+          run: |
+            bash -c "./crawl.com --help"
+
+      - name: Check crawl.com
+        if: ${{ matrix.os == 'NetBSD' }}
+        uses: vmactions/netbsd-vm@v1
+        with:
+          usesh: true
+          copyback: false
+          run: |
+            bash -c "./crawl.com --help"
