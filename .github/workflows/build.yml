@@ -220,6 +220,9 @@ jobs:
           - runner: ubuntu-latest
             arch: x86_64
             os: NetBSD
+          - runner: ubuntu-latest
+            arch: x86_64
+            os: OpenBSD
 
     steps:
       - name: Set up cosmocc
@@ -261,5 +264,15 @@ jobs:
         with:
           usesh: true
           copyback: false
+          run: |
+            ./crawl.com -version
+
+      - name: Check crawl.com
+        if: ${{ matrix.os == 'OpenBSD' }}
+        uses: vmactions/openbsd-vm@v1
+        with:
+          usesh: true
+          copyback: false
+          release: 7.3
           run: |
             ./crawl.com -version
