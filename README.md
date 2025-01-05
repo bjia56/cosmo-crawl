@@ -2,11 +2,11 @@
 
 `cosmo-crawl` is a repository that builds **Dungeon Crawl Stone Soup** using [Cosmopolitan Libc](https://justine.lol/cosmopolitan/). The result is a self-contained `crawl.com` binary that can run on multiple operating systems and architectures without requiring external dependencies.
 
-**Cross-Platform**: Single executable runs on Linux, macOS, Windows, FreeBSD, OpenBSD (<= 7.3), NetBSD.
+- **Cross-Platform**: Single executable runs on Linux, macOS, Windows, FreeBSD, OpenBSD (<= 7.3), NetBSD.
 
-**Self-Contained**: No additional libraries or runtime dependencies are required, with all DCSS assets bundled into the executable.
+- **Self-Contained**: No additional libraries or runtime dependencies are required, with all DCSS assets bundled into the executable.
 
-**Multi-Architecture**: Runs on both x86_64 and arm64.
+- **Multi-Architecture**: Runs on both x86_64 and arm64.
 
 ## Download  
 
