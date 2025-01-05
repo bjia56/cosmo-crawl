@@ -17,6 +17,10 @@ Prebuilt binaries can be found on the [Releases](https://github.com/bjia56/cosmo
 Example:  
 - Tag `0.32.1.2` corresponds to Dungeon Crawl Stone Soup version `0.32.1` with the second build of `cosmo-crawl`.
 
+## Known issues
+
+Running `crawl.com` on Windows does not render correctly in the terminal.
+
 ## License  
 
 This repository is licensed under the **CC0-1.0 License**. Note that Dungeon Crawl Stone Soup itself is distributed under its own license. Please refer to the upstream [Dungeon Crawl Stone Soup repository](https://github.com/crawl/crawl) for more information.  
