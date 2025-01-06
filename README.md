@@ -12,10 +12,10 @@
 
 Prebuilt binaries can be found on the [Releases](https://github.com/bjia56/cosmo-crawl/releases) page. Releases are tagged using the format `major.minor.patch.build`, where:  
 - `major.minor.patch` corresponds to the upstream Dungeon Crawl Stone Soup version.  
-- `build` is an incremental build number for this repository.  
+- `build` is an incremental zero-indexed build number for this repository.  
 
 Example:  
-- Tag `0.32.1.2` corresponds to Dungeon Crawl Stone Soup version `0.32.1` with the second build of `cosmo-crawl`.
+- Tag `0.32.1.2` corresponds to Dungeon Crawl Stone Soup version `0.32.1` with the third build of `cosmo-crawl`.
 
 ## Known issues
 
