@@ -11,6 +11,7 @@ on:
         type: boolean
   push:
     branches: ["main"]
+  pull_request:
   workflow_call:
     inputs:
       dcss_version:
